@@ -273,104 +273,87 @@ if st.session_state.modal_movie:
 
     poster_b64 = cached_poster_b64(title)
 
+    # ── build inline HTML fragments ──
+    if poster_b64:
+        poster_section = (
+            f"<div style='width:100%;height:340px;overflow:hidden;"
+            f"border-radius:14px;margin-bottom:18px;position:relative;'>"
+            f"<img src='data:image/jpeg;base64,{poster_b64}' "
+            f"style='width:100%;height:100%;object-fit:cover;object-position:center top;"
+            f"display:block;filter:brightness(0.88);'/>"
+            f"<div style='position:absolute;bottom:0;left:0;right:0;height:100px;"
+            f"background:linear-gradient(transparent,#0c0c22);'></div>"
+            f"</div>"
+        )
+    else:
+        poster_section = (
+            f"<div style='width:100%;height:260px;background:rgba(20,20,50,0.9);"
+            f"display:flex;align-items:center;justify-content:center;"
+            f"font-size:64px;border-radius:14px;margin-bottom:18px;'>🎞️</div>"
+        )
+
     genre_html = render_genre_tags(genres)
+
+    badges = ""
+    if emotion:
+        badges += f"<span class='meta-badge' style='background:{ec};color:#e8e8f0;border:1px solid rgba(255,255,255,0.1);'>{ee} {emotion}</span>"
+    if risk:
+        badges += f"<span class='meta-badge' style='background:{rc}18;color:{rc};border:1px solid {rc}44;'>{risk} Risk</span>"
+    badges_html = f"<div style='margin:6px 0 8px;'>{badges}</div>" if badges else ""
+
+    reason_html = (
+        f"<p style='color:#8888aa;font-size:12px;margin:2px 0 10px;line-height:1.5;'>💡 {reason}</p>"
+        if reason else ""
+    )
+
+    if conf:
+        conf_section = (
+            f"<div style='margin:4px 0 16px;'>"
+            f"<div style='display:flex;justify-content:space-between;align-items:center;"
+            f"font-size:11px;color:#777;margin-bottom:5px;'>"
+            f"<span style='letter-spacing:0.5px;'>CONFIDENCE</span>"
+            f"<span style='color:#63b3ed;font-weight:700;font-size:13px;'>{conf}%</span></div>"
+            f"<div class='conf-wrap'><div class='conf-fill' style='width:{conf}%;'></div></div>"
+            f"</div>"
+        )
+    else:
+        conf_section = ""
+
+    divider = "<hr style='border:none;border-top:1px solid rgba(99,179,237,0.15);margin:14px 0;'/>"
 
     # ── centred card column ──
     _, mcol, _ = st.columns([1, 2, 1])
     with mcol:
 
-        # ── Outer card wrapper opens ──
+        # ── TOP of card: everything above the slider (pure HTML) ──
         st.markdown(
             f"<div style='"
             f"background:linear-gradient(170deg,#0c0c22,#13132e,#0f0f28);"
             f"border:1px solid rgba(99,179,237,0.30);border-radius:20px;"
             f"padding:22px 24px 4px;"
             f"box-shadow:0 20px 60px rgba(0,0,0,0.7);"
-            f"'>",
-            unsafe_allow_html=True
-        )
-
-        # ── TWO-COLUMN layout: poster LEFT, info RIGHT ──
-        img_col, info_col = st.columns([1, 1.6])
-
-        with img_col:
-            if poster_b64:
-                st.markdown(
-                    f"<div style='width:100%;overflow:hidden;border-radius:12px;"
-                    f"position:relative;height:100%;min-height:280px;'>"
-                    f"<img src='data:image/jpeg;base64,{poster_b64}' "
-                    f"style='width:100%;height:100%;object-fit:cover;object-position:center top;"
-                    f"display:block;filter:brightness(0.88);border-radius:12px;'/>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f"<div style='width:100%;min-height:280px;background:rgba(20,20,50,0.9);"
-                    f"display:flex;align-items:center;justify-content:center;"
-                    f"font-size:64px;border-radius:12px;'>🎞️</div>",
-                    unsafe_allow_html=True
-                )
-
-        with info_col:
-            # Title
-            st.markdown(
-                f"<div style='color:#eeeeff;font-size:20px;font-weight:700;"
-                f"line-height:1.3;margin-bottom:6px;'>{title}</div>",
-                unsafe_allow_html=True
-            )
-            # Year · Global avg
-            st.markdown(
-                f"<div style='color:#666;font-size:12px;margin-bottom:10px;'>"
-                f"📅 {year} &nbsp;·&nbsp; "
-                f"🌍 Global avg: <strong style='color:#aaa;'>{glob_avg} ⭐</strong></div>",
-                unsafe_allow_html=True
-            )
-            # Genre tags
-            st.markdown(genre_html, unsafe_allow_html=True)
-
-            # Emotion badge + confidence % on same line
-            if emotion:
-                st.markdown(
-                    f"<div style='display:flex;justify-content:space-between;"
-                    f"align-items:center;margin:8px 0 4px;'>"
-                    f"<span class='meta-badge' style='background:{ec};color:#e8e8f0;"
-                    f"border:1px solid rgba(255,255,255,0.1);margin:0;'>{ee} {emotion}</span>"
-                    f"<span style='color:#63b3ed;font-weight:700;font-size:13px;'>{conf}%</span>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
-
-            # Confidence label + bar
-            if conf:
-                st.markdown(
-                    f"<div style='margin:2px 0 8px;'>"
-                    f"<div style='font-size:11px;color:#777;margin-bottom:4px;'>"
-                    f"Confidence</div>"
-                    f"<div class='conf-wrap'>"
-                    f"<div class='conf-fill' style='width:{conf}%;'></div>"
-                    f"</div></div>",
-                    unsafe_allow_html=True
-                )
-
-            # Reason line
-            if reason:
-                st.markdown(
-                    f"<p style='color:#8888aa;font-size:12px;margin:4px 0 8px;"
-                    f"line-height:1.5;'>💡 {reason}</p>",
-                    unsafe_allow_html=True
-                )
-
-        # ── Divider ──
-        st.markdown(
-            "<hr style='border:none;border-top:1px solid rgba(99,179,237,0.15);margin:16px 0 10px;'/>",
-            unsafe_allow_html=True
-        )
-
-        # ── Rating slider label: "⭐ Your rating for <clean title>" ──
-        st.markdown(
-            f"<p style='color:#e8c84a;font-size:13px;font-weight:600;margin:0 0 4px;'>"
-            f"⭐ Your rating for {clean}</p>",
+            f"'>"
+            # poster — tall vertical rectangle
+            f"{poster_section}"
+            # title
+            f"<div style='color:#eeeeff;font-size:19px;font-weight:700;"
+            f"line-height:1.3;margin-bottom:5px;'>{title}</div>"
+            # year · avg
+            f"<div style='color:#555;font-size:12px;margin-bottom:10px;'>"
+            f"📅 {year} &nbsp;·&nbsp; 🌍 avg "
+            f"<strong style='color:#888;'>{glob_avg}⭐</strong></div>"
+            # genres
+            f"{genre_html}"
+            # emotion + risk badges
+            f"{badges_html}"
+            # reason
+            f"{reason_html}"
+            # confidence bar
+            f"{conf_section}"
+            f"{divider}"
+            # "Rate" label — slider rendered by Streamlit below
+            f"<p style='color:#9090bb;font-size:11px;letter-spacing:0.8px;"
+            f"margin:0 0 2px;text-transform:uppercase;'>Rate</p>",
             unsafe_allow_html=True
         )
 
@@ -387,13 +370,22 @@ if st.session_state.modal_movie:
         )
         st.session_state.pending_rating[rkey] = new_r
 
+        # star display row
+        st.markdown(
+            f"<div style='text-align:center;font-size:22px;margin:2px 0 14px;'>"
+            f"{'⭐'*int(new_r)}{'½' if new_r%1>=0.5 else ''}"
+            f"<span style='color:#666;font-size:13px;margin-left:8px;'>{new_r} / 5</span>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
         # ── BUTTONS row ──
         b_left, b_right = st.columns(2)
         with b_left:
             if rkey in st.session_state.rating_submitted:
                 st.success(f"✅ Saved {new_r}⭐")
             else:
-                if st.button("✅  Submit Rating", use_container_width=True,
+                if st.button("✅  Submit", use_container_width=True,
                              key=f"modal_submit_{title}"):
                     if save_rating(uid, title, new_r):
                         st.session_state.rating_submitted.add(rkey)
