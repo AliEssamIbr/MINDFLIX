@@ -14,7 +14,7 @@ from recommender import (
     TRAIT_EMOJI, TRAIT_DESC, EMOTION_EMOJI,
 )
 
-API_KEY = "fb31800ec9c863ba6a8ef75f7ed38aa4"
+API_KEY = "API KEY HERE"
 st.set_page_config(page_title="AI Movie Recommender", layout="wide")
 
 ALL_GENRES = ["Action","Adventure","Animation","Children","Comedy","Crime",
